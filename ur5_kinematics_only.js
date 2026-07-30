@@ -41,22 +41,22 @@ Algebra(3,0,1,() => {
 
   //Denavit-Hartenberg Motor Generator
   const Mdh = (alpha, a, theta, d) => {
-    let Rz = Math.cos(0.5*theta) - Math.sin(0.5*theta)*1e31; //Rotation around z
-    let Tz = 1 - 0.5*d*1e02;                                // Translation along z
-    let Tx = 1 - 0.5*a*1e01;                                // Translation along X
-    let Rx = Math.cos(0.5*alpha) - Math.sin(0.5*alpha)*1e23; //Rotation around X
+    let Rz = Math.cos(0.5*theta) - Math.sin(0.5*theta)*1e31; // Rotation around z
+    let Tz = 1 - 0.5*d*1e02;                                 // Translation along z
+    let Tx = 1 - 0.5*a*1e01;                                 // Translation along x
+    let Rx = Math.cos(0.5*alpha) - Math.sin(0.5*alpha)*1e23; // Rotation around x
     return Rz * Tz * Tx * Rx;
   };
 
   //Nominal UR5 DH parameters
   const pi = Math.PI;
   const dhParams = [
-    { alpha : pi/2.0,  a : 0.0,    d : 0.0892  }, //Joint 1
-    { alpha : 0.0,     a : -0.425, d : 0.0     }, //Joint 2
-    { alpha : 0.0,     a : -0.392, d : 0.0     }, //Joint 3
-    { alpha : pi/2.0,  a : 0.0,    d : 0.10915 }, //Joint 4
-    { alpha : -pi/2.0, a : 0.0,    d : 0.09465 }, //Joint 5
-    { alpha : 0.0,     a : 0.0,    d : 0.0825  }  //Joint 6
+    { alpha : pi/2.0,  a : 0.0,    d : 0.0892  },  //Joint 1
+    { alpha : 0.0,     a : 0.425,  d : 0.0     },  //Joint 2
+    { alpha : 0.0,     a : 0.392,  d : 0.0     },  //Joint 3
+    { alpha : pi/2.0,  a : 0.0,    d : 0.10915 },  //Joint 4
+    { alpha : -pi/2.0, a : 0.0,    d : 0.09465 },  //Joint 5
+    { alpha : 0.0,     a : 0.0,    d : 0.0825  }   //Joint 6
   ];
 
   const origin = 1e123;
