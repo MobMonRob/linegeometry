@@ -41,11 +41,11 @@ Algebra(3,0,1,() => {
 
   //Denavit-Hartenberg Motor Generator
   const Mdh = (alpha, a, theta, d) => {
-    let Ry = Math.cos(0.5*theta) - Math.sin(0.5*theta)*1e31; //Rotation around Y
-    let Ty = 1 - 0.5*d*1e02;                                // Translation along Y
+    let Rz = Math.cos(0.5*theta) - Math.sin(0.5*theta)*1e31; //Rotation around z
+    let Tz = 1 - 0.5*d*1e02;                                // Translation along z
     let Tx = 1 - 0.5*a*1e01;                                // Translation along X
     let Rx = Math.cos(0.5*alpha) - Math.sin(0.5*alpha)*1e23; //Rotation around X
-    return Ry * Ty * Tx * Rx;
+    return Rz * Tz * Tx * Rx;
   };
 
   //Nominal UR5 DH parameters
