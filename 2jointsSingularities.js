@@ -1,14 +1,18 @@
 Algebra(3,0,1, () => {
   
   const origin = 1e123;
-  const createPoint = (x, y, z) => {
-    let Tx = 1.0 - 0.5 * x * 1e01;
-    let Ty = 1.0 - 0.5 * y * 1e02;
-    let Tz = 1.0 - 0.5 * z * 1e03;
-    let T = Tx * Ty * Tz;
-    return T * origin * ~T;
-  };
+ // const createPoint = (x, y, z) => {
+ //   let Tx = 1.0 - 0.5 * x * 1e01;
+ //   let Ty = 1.0 - 0.5 * y * 1e02;
+ //   let Tz = 1.0 - 0.5 * z * 1e03;
+ //   let T = Tx * Ty * Tz;
+ //   return T * origin * ~T;
+ // };
 
+  const createPoint = (x, y, z) => {
+     return !(1e0 + x*1e1 + y*1e2 + z*1e3);
+  };
+  
   const p1_skew = createPoint(-1, 0.5, -1);
   const p2_skew = createPoint(1, 0.5, 1);
   const L1_skew = p1_skew & p2_skew; 
