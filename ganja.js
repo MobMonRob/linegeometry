@@ -9,7 +9,7 @@ Algebra(3,0,1,() => {
   panel.style.cssText = 'position:absolute; top:15px; right:15px; z-index:9999; background:rgba(255, 255, 255, 0.95); padding:10px; width:220px; border:1px solid #ccc; border-radius:5px; font-family:sans-serif;';
   document.body.appendChild(panel);
 
-  panel.innerHTML = '<h4 style="margin:0 0 10px 0; color:#333; font-size:14px;">UR5 Exact Angles (°) </h4>';
+  panel.innerHTML = '<h4 style="margin:0 0 10px 0; color:#333; font-size:14px;">UR5 Direct Kinematics</h4>';
 
   //Numeric input for theta entry
   const createNumberControl = (label, min, max, initialVal) => {
@@ -41,11 +41,11 @@ Algebra(3,0,1,() => {
 
   //Denavit-Hartenberg Motor Generator
   const Mdh = (alpha, a, theta, d) => {
-    let Rz = Math.cos(0.5*theta) - Math.sin(0.5*theta)*1e31; //Rotation around z
-    let Tz = 1 - 0.5*d*1e02;                                // Translation along z
+    let Ry = Math.cos(0.5*theta) - Math.sin(0.5*theta)*1e31; //Rotation around Y
+    let Ty = 1 - 0.5*d*1e02;                                // Translation along Y
     let Tx = 1 - 0.5*a*1e01;                                // Translation along X
     let Rx = Math.cos(0.5*alpha) - Math.sin(0.5*alpha)*1e23; //Rotation around X
-    return Rz * Tz * Tx * Rx;
+    return Ry * Ty * Tx * Rx;
   };
 
   //Nominal UR5 DH parameters
@@ -63,50 +63,48 @@ Algebra(3,0,1,() => {
   const Y_axe = 1e31;
   const M_base = (1.0 - 0.5 * 1e01) * (1.0 - 0.5 * (-1) * 1e02);
   const L_0 = M_base * Y_axe * ~M_base;
-  const P_0 = M_base * origin * ~M_base;
+  const P_0 = M_base * origin * ~M_base; // Base point
+
+  // Preparation of cylinder extremities for the joints
+  const cyl_length = 0.15; // 15 cm to make them clearly visible over the line
+  const T_up = 1.0 - 0.5 * (cyl_length / 2) * 1e02;
+  const T_down = 1.0 - 0.5 * (-cyl_length / 2) * 1e02;
+  const p_local_up = T_up * origin * ~T_up;
+  const p_local_down = T_down * origin * ~T_down;
 
   //Automated Forward Kinematics Engine
   const computeForwardKinematics = (params, angles) => {
     let M_abs_current = M_base;
     let rawAxes = [], points = [];
+    let jointCylinders = [];
 
-    //Detection of singularities
     for (let i = 0; i < params.length; i++) {
       let M_rel = Mdh(params[i].alpha, params[i].a, angles[i], params[i].d);
       M_abs_current = M_abs_current * M_rel;
-
+      
+      // RESTORED: Infinite rotation lines
       rawAxes.push(M_abs_current * Y_axe * ~M_abs_current);
+
+      // Center point of the joint (used to connect the arms)
       points.push(M_abs_current * origin * ~M_abs_current);
+
+      // Creation of the cylinder/segment for the joint itself
+      let pt_up = M_abs_current * p_local_up * ~M_abs_current;
+      let pt_down = M_abs_current * p_local_down * ~M_abs_current;
+      jointCylinders.push([pt_up, pt_down]);
     }
-
-    //Singularities verifications
-    const Epsilon_Ang = 0.05;
-    const Epsilon_Dist = 0.05;
-
-    let singWrist = Math.abs(angles[4]) < Epsilon_Ang || Math.abs(Math.abs(angles[4]) - pi) < Epsilon_Ang; // Test around 0 and pi
-    let singElbow = Math.abs(angles[2]) < Epsilon_Ang || Math.abs(Math.abs(angles[2]) - pi) < Epsilon_Ang; // Test around 0 and pi
-
-    let ShoulderDist = (points[4] ^ rawAxes[0]).length;
-    let singShoulder = ShoulderDist < Epsilon_Dist;
-
+    
+    // Applying color to the axes
     let axes = [];
     for (let i = 0; i < 6; i++) {
-      if (((i == 3 || i == 5) && singWrist)) {
-        axes.push(0xFF00FF); //magenta
-      } else if (((i == 1 || i == 2) && singElbow)) {
-        axes.push(0x00FFFF); // cyan
-      } else if (((i == 0 || i == 3) && singShoulder)) {
-        axes.push(0xFFFF00);
-      } else {
-        axes.push(0xFF5722);
-      }
-      
+      axes.push(0xFF5722); // Orange
       axes.push(rawAxes[i]);
     }
 
-    return { axes, points };
+    return { axes, points, jointCylinders };
   };
 
+  // Generate line segments between joints (the robot arms)
   const generateSegments = (basePoint, jointPoints) => {
     let allPoints = [basePoint, ...jointPoints];
     let segments = [];
@@ -121,6 +119,7 @@ Algebra(3,0,1,() => {
   // Real-time rendering
   return this.graph(() => {
     
+    // Fetch and convert slider values to radians
     const thetas = [
       parseFloat(in1.value || 0) * (pi / 180),
       parseFloat(in2.value || 0) * (pi / 180),
@@ -130,26 +129,25 @@ Algebra(3,0,1,() => {
       parseFloat(in6.value || 0) * (pi / 180)
     ];
 
-    const { axes, points } = computeForwardKinematics(dhParams, thetas);
+    const { axes, points, jointCylinders } = computeForwardKinematics(dhParams, thetas);
     const segments = generateSegments(P_0, points);
 
-    //Clean return array
+    //Clean return array for rendering
     return [
-      0x222222, "UR5 Forward Kinematics",
-      0xFF5722, L_0, ...axes,
-      0xFF0000, P_0, "Base",
-      0x000000, ...points,
-      0x00FF00, ...segments,
+      0x222222, "UR5 Direct Kinematics Only",
+      0xFF5722, L_0, ...axes,       // The infinite lines are back!
+      0x0000FF, P_0, "Base",        
+      0x333333, ...jointCylinders,  // The old points, now cylinders along the axis
+      0x00FF00, ...segments,        // The arm links in green
     ];
   }, {
     grid        : true, // Display a grid
     labels      : true, // Label the grid
     h           : 0.4,  // Heading
     p           : -0.2, // Pitching
-    lineWidth   : 3,    // Custom lineWidth (default=1)
-    pointRadius : 1,    // Custom point radius (default=1)
+    lineWidth   : 2,    // Slightly thickened to clearly see the cylinder effect of the joints
     fontSize    : 1,    // Custom font size (default=1)
-    scale       : 1,    // Custom scale (default=1), mousewheel.
-    animate     : true,
+    scale       : 1.5,  // Custom scale (default=1), mousewheel.
+    animate     : true
   });
 });
