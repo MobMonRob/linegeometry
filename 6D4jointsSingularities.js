@@ -1,37 +1,72 @@
-Algebra(6, 0, 0, () => {
-  const pgaToG6 = (c01, c02, c03, c12, c13, c23) => {
-    return c01 * 1e1 + c02 * 1e2 + c03 * 1e3 + c12 * 1e4 + c13 * 1e5 + c23 * 1e6;
+Algebra(3,0,1, () => {
+  let oldGui = document.getElementById('comparison-gui');
+  if (oldGui) oldGui.remove();
+
+  let panel = document.createElement('div');
+  panel.id = 'comparison-gui';
+  panel.style.cssText = 'position:absolute; top:15px; left:15px; z-index:9999; background:rgba(255, 255, 255, 0.95); padding:15px; border-radius:5px; font-family:sans-serif; box-shadow: 0 4px 6px rgba(0,0,0,0.1); width: 380px;';
+  document.body.appendChild(panel);
+
+  const point = (x, y, z) => 1e123 - x*1e023 + y*1e013 + z*1e012;
+  
+  // --- MOTEUR G6 : MATRICE DE GRAM POUR N LIGNES ---
+  const getG6Coords = (L) => [L[5]||0, L[6]||0, L[7]||0, L[8]||0, L[9]||0, L[10]||0];
+  const dot6 = (A, B) => A.reduce((sum, val, i) => sum + val * B[i], 0);
+  
+  const determinant = (m) => {
+    if (m.length === 1) return m[0][0];
+    if (m.length === 2) return m[0][0]*m[1][1] - m[0][1]*m[1][0];
+    let det = 0;
+    for (let i = 0; i < m.length; i++) {
+      let subMatrix = m.slice(1).map(row => row.filter((_, j) => j !== i));
+      det += (i % 2 === 0 ? 1 : -1) * m[0][i] * determinant(subMatrix);
+    }
+    return det;
   };
 
-  const L1_4dof = pgaToG6(1, 0, 0, 0, 1, 0);
-  const L2_4dof = pgaToG6(0, 1, 0, 0, 0, 1);
-  const L3_4dof = pgaToG6(0, 0, 1, 1, 0, 0);
-  const L4_4dof = pgaToG6(1, 1, 0, 0, 1, 1);
+  const wedgeNormG6 = (...lines) => {
+    let vecs = lines.map(getG6Coords);
+    let N = vecs.length;
+    let gram = Array(N).fill(0).map(() => Array(N).fill(0));
+    for(let i=0; i<N; i++) {
+      for(let j=0; j<N; j++) {
+        gram[i][j] = dot6(vecs[i], vecs[j]);
+      }
+    }
+    return Math.sqrt(Math.max(0, determinant(gram)));
+  };
 
-  const wedge_4dof = L1_4dof ^ L2_4dof ^ L3_4dof ^ L4_4dof;
-  const is_4dof_singular = wedge_4dof.Length === 0;
+  // --- CONFIGURATIONS 4 JOINTS ---
+  // 1. 4 DOF : Lignes indépendantes (ex: 2 plans)
+  const L1_4dof = point(-4, 0, -1) & point(-2, 0, 1);
+  const L2_4dof = point(-4, 1, 1) & point(-2, 1, -1);
+  const L3_4dof = point(-4, -1, 0) & point(-2, -1, 0); 
+  const L4_4dof = point(-3, -2, 1) & point(-3, 2, 1); 
 
-  const L1_3dof = pgaToG6(1, 0, 0, 0, 0, 0);
-  const L2_3dof = pgaToG6(0, 1, 0, 0, 0, 0);
-  const L3_3dof = pgaToG6(0, 0, 1, 0, 0, 0);
-  const L4_3dof = pgaToG6(1, 1, 1, 0, 0, 0);
+  // 2. 3 DOF (Singularité du poignet) : Lignes concourantes (se croisent au centre)
+  const L1_3dof = point(2, 0, -1) & point(4, 0, 1);
+  const L2_3dof = point(2, 0, 1) & point(4, 0, -1);
+  const L3_3dof = point(3, -1, 0) & point(3, 1, 0);
+  const L4_3dof = point(3, 0, -1.5) & point(3, 0, 1.5); 
 
-  const wedge_3dof = L1_3dof ^ L2_3dof ^ L3_3dof ^ L4_3dof;
-  const is_3dof_singular = wedge_3dof.Length === 0;
+  // --- CALCULS ---
+  const g6_4dof = wedgeNormG6(L1_4dof, L2_4dof, L3_4dof, L4_4dof);
+  const g6_3dof = wedgeNormG6(L1_3dof, L2_3dof, L3_3dof, L4_3dof);
 
-  document.body.innerHTML = `
-    <div style="font-family: sans-serif; padding: 30px; color: #333;">
-      <h2>4 Joints/Lines Detection in Cl(6,0,0)</h2>
-      <div style="margin-bottom: 20px; padding: 15px; background: #e3f2fd; border-radius: 5px; border-left: 5px solid #2196F3;">
-        <strong>4 DOF</strong><br>
-        Norm: ${wedge_4dof.Length.toFixed(4)}<br>
-        Is Singular? <span style="color: red; font-weight: bold;">${is_4dof_singular}</span>
-      </div>
-      <div style="margin-bottom: 20px; padding: 15px; background: #fbe9e7; border-radius: 5px; border-left: 5px solid #FF5722;">
-        <strong>3 DOF SINGULAR</strong><br>
-        Norm: ${wedge_3dof.Length.toFixed(4)}<br>
-        Is Singular? <span style="color: green; font-weight: bold;">${is_3dof_singular}</span>
-      </div>
-    </div>
+  panel.innerHTML = `
+    <h3 style="margin-top:0; color:#333;">PGA vs G6 (4 Joints)</h3>
+    <p style="color:#0000FF;"><strong>1. 4 DOF (Independent)</strong><br>
+       PGA = 0.00 (Algebra capacity exceeded)<br>
+       G6 = ${g6_4dof.toFixed(2)} (Non-zero = Independent)</p>
+    <p style="color:#FF0000;"><strong>2. 3 DOF (Wrist Singularity)</strong><br>
+       PGA = 0.00<br>
+       G6 = ${g6_3dof.toFixed(2)} (Zero = Singular in G6!)</p>
   `;
+
+  return this.graph(() => {
+    return [
+      0x0000FF, L1_4dof, L2_4dof, L3_4dof, L4_4dof,
+      0xFF0000, L1_3dof, L2_3dof, L3_3dof, L4_3dof
+    ];
+  }, { grid: true, labels: true, lineWidth: 3, h: 0.2, p: -0.1, scale: 0.6 });
 });
