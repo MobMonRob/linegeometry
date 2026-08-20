@@ -9,11 +9,11 @@ Algebra(3,0,1, () => {
 
   const point = (x, y, z) => 1e123 - x*1e023 + y*1e013 + z*1e012;
   
-  // --- MOTEUR G6 : MATRICE DE GRAM POUR N LIGNES ---
+  // --- G6 ENGINE: GRAM MATRIX FOR N LINES ---
   const getG6Coords = (L) => [L[5]||0, L[6]||0, L[7]||0, L[8]||0, L[9]||0, L[10]||0];
   const dot6 = (A, B) => A.reduce((sum, val, i) => sum + val * B[i], 0);
   
-  // Calcul du déterminant d'une matrice NxN
+  // Calculate the determinant of an NxN matrix
   const determinant = (m) => {
     if (m.length === 1) return m[0][0];
     if (m.length === 2) return m[0][0]*m[1][1] - m[0][1]*m[1][0];
@@ -25,7 +25,7 @@ Algebra(3,0,1, () => {
     return det;
   };
 
-  // Norme du produit extérieur G6 via la Matrice de Gram
+  // Norm of the G6 outer product via the Gram Matrix
   const wedgeNormG6 = (...lines) => {
     let vecs = lines.map(getG6Coords);
     let N = vecs.length;
@@ -38,20 +38,20 @@ Algebra(3,0,1, () => {
     return Math.sqrt(Math.max(0, determinant(gram)));
   };
 
-  // --- CONFIGURATIONS 3 JOINTS ---
-  // 1. 3 DOF : Lignes indépendantes dans l'espace
+  // --- 3 JOINTS CONFIGURATIONS ---
+  // 1. 3 DOF: Independent lines in space
   const L1_3dof = point(-4, 0, -1) & point(-2, 0, 1);
   const L2_3dof = point(-4, 1, 1) & point(-2, 1, -1);
   const L3_3dof = point(-3, -1, 0) & point(-3, 2, 0); 
   
-  // 2. 2 DOF (Singularité du coude) : Lignes parallèles
+  // 2. 2 DOF (Elbow Singularity): Parallel lines
   const L1_2dof = point(2, 0, 0) & point(4, 0, 0);
   const L2_2dof = point(2, 1, 0) & point(4, 1, 0);
   const L3_2dof = point(2, 2, 0) & point(4, 2, 0); 
 
-  // --- CALCULS ---
-  // En PGA, le produit de 3 bivecteurs dépasse la dimension de l'espace (grade 6 dans un espace 4D). 
-  // Il est donc toujours nul.
+  // --- CALCULATIONS ---
+  // In PGA, the product of 3 bivectors exceeds the dimension of the space (grade 6 in a 4D space). 
+  // Therefore, it is always zero.
   const pga_3dof = 0; 
   const pga_2dof = 0; 
 

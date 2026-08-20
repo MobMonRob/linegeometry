@@ -9,7 +9,7 @@ Algebra(3,0,1, () => {
 
   const point = (x, y, z) => 1e123 - x*1e023 + y*1e013 + z*1e012;
   
-  // --- MOTEUR G6 : MATRICE DE GRAM POUR N LIGNES ---
+  // --- G6 ENGINE: GRAM MATRIX FOR N LINES ---
   const getG6Coords = (L) => [L[5]||0, L[6]||0, L[7]||0, L[8]||0, L[9]||0, L[10]||0];
   const dot6 = (A, B) => A.reduce((sum, val, i) => sum + val * B[i], 0);
   
@@ -36,20 +36,20 @@ Algebra(3,0,1, () => {
     return Math.sqrt(Math.max(0, determinant(gram)));
   };
 
-  // --- CONFIGURATIONS 4 JOINTS ---
-  // 1. 4 DOF : Lignes indépendantes (ex: 2 plans)
+  // --- 4 JOINTS CONFIGURATIONS ---
+  // 1. 4 DOF: Independent lines (e.g., in 2 planes)
   const L1_4dof = point(-4, 0, -1) & point(-2, 0, 1);
   const L2_4dof = point(-4, 1, 1) & point(-2, 1, -1);
   const L3_4dof = point(-4, -1, 0) & point(-2, -1, 0); 
   const L4_4dof = point(-3, -2, 1) & point(-3, 2, 1); 
 
-  // 2. 3 DOF (Singularité du poignet) : Lignes concourantes (se croisent au centre)
+  // 2. 3 DOF (Wrist Singularity): Concurrent lines (intersecting at the center)
   const L1_3dof = point(2, 0, -1) & point(4, 0, 1);
   const L2_3dof = point(2, 0, 1) & point(4, 0, -1);
   const L3_3dof = point(3, -1, 0) & point(3, 1, 0);
   const L4_3dof = point(3, 0, -1.5) & point(3, 0, 1.5); 
 
-  // --- CALCULS ---
+  // --- CALCULATIONS ---
   const g6_4dof = wedgeNormG6(L1_4dof, L2_4dof, L3_4dof, L4_4dof);
   const g6_3dof = wedgeNormG6(L1_3dof, L2_3dof, L3_3dof, L4_3dof);
 
