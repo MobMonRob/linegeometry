@@ -41,7 +41,7 @@ Algebra(3,0,1,() => {
 
   //Denavit-Hartenberg Motor Generator
   const Mdh = (alpha, a, theta, d) => {
-    let Rz = Math.cos(0.5*theta) - Math.sin(0.5*theta)*1e31; // Rotation around z
+    let Rz = Math.cos(0.5*theta) - Math.sin(0.5*theta)*1e31; // FIXME Should be rotation around z: 1e12
     let Tz = 1 - 0.5*d*1e02;                                 // Translation along z
     let Tx = 1 - 0.5*a*1e01;                                 // Translation along x
     let Rx = Math.cos(0.5*alpha) - Math.sin(0.5*alpha)*1e23; // Rotation around x
