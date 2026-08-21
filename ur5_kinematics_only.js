@@ -52,8 +52,8 @@ Algebra(3,0,1,() => {
   const pi = Math.PI;
   const dhParams = [
     { alpha : pi/2.0,  a : 0.0,    d : 0.0892  },  //Joint 1
-    { alpha : 0.0,     a : 0.425,  d : 0.0     },  //Joint 2
-    { alpha : 0.0,     a : 0.392,  d : 0.0     },  //Joint 3
+    { alpha : 0.0,     a : 0.425,  d : 0.0     },  //Joint 2 FIXME a should be -1
+    { alpha : 0.0,     a : 0.392,  d : 0.0     },  //Joint 3 FIXME a should be -1
     { alpha : pi/2.0,  a : 0.0,    d : 0.10915 },  //Joint 4
     { alpha : -pi/2.0, a : 0.0,    d : 0.09465 },  //Joint 5
     { alpha : 0.0,     a : 0.0,    d : 0.0825  }   //Joint 6
