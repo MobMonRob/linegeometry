@@ -40,14 +40,14 @@ Algebra(3,0,1, () => {
 
   // --- 3 JOINTS CONFIGURATIONS ---
   // 1. 3 DOF: Independent lines in space
-  const L1_3dof = point(-4, 0, -1) & point(-2, 0, 1);
-  const L2_3dof = point(-4, 1, 1) & point(-2, 1, -1);
-  const L3_3dof = point(-3, -1, 0) & point(-3, 2, 0); 
+  const L1_3dof = point(-0.4, 0, -0.1) & point(-0.2, 0, 0.1);
+  const L2_3dof = point(-0.4, 0.1, 0.1) & point(-0.2, 0.1, -0.1);
+  const L3_3dof = point(-0.3, -0.1, 0) & point(-0.3, 0.2, 0); 
   
   // 2. 2 DOF (Elbow Singularity): Parallel lines
-  const L1_2dof = point(2, 0, 0) & point(4, 0, 0);
-  const L2_2dof = point(2, 1, 0) & point(4, 1, 0);
-  const L3_2dof = point(2, 2, 0) & point(4, 2, 0); 
+  const L1_2dof = point(0.2, 0, 0) & point(0.4, 0, 0);
+  const L2_2dof = point(0.2, 0.1, 0) & point(0.4, 0.1, 0);
+  const L3_2dof = point(0.2, 0.2, 0) & point(0.4, 0.2, 0); 
 
   // --- CALCULATIONS ---
   // In PGA, the product of 3 bivectors exceeds the dimension of the space (grade 6 in a 4D space). 

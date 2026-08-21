@@ -13,6 +13,7 @@ Algebra(3,0,1, () => {
   const getG6Coords = (L) => [L[5]||0, L[6]||0, L[7]||0, L[8]||0, L[9]||0, L[10]||0];
   const dot6 = (A, B) => A.reduce((sum, val, i) => sum + val * B[i], 0);
   
+  // Calculate the determinant of an NxN matrix
   const determinant = (m) => {
     if (m.length === 1) return m[0][0];
     if (m.length === 2) return m[0][0]*m[1][1] - m[0][1]*m[1][0];
@@ -24,6 +25,7 @@ Algebra(3,0,1, () => {
     return det;
   };
 
+  // Norm of the G6 outer product via the Gram Matrix
   const wedgeNormG6 = (...lines) => {
     let vecs = lines.map(getG6Coords);
     let N = vecs.length;
@@ -38,16 +40,16 @@ Algebra(3,0,1, () => {
 
   // --- 4 JOINTS CONFIGURATIONS ---
   // 1. 4 DOF: Independent lines (e.g., in 2 planes)
-  const L1_4dof = point(-4, 0, -1) & point(-2, 0, 1);
-  const L2_4dof = point(-4, 1, 1) & point(-2, 1, -1);
-  const L3_4dof = point(-4, -1, 0) & point(-2, -1, 0); 
-  const L4_4dof = point(-3, -2, 1) & point(-3, 2, 1); 
+  const L1_4dof = point(-0.4, 0, -0.1) & point(-0.2, 0, 0.1);
+  const L2_4dof = point(-0.4, 0.1, 0.1) & point(-0.2, 0.1, -0.1);
+  const L3_4dof = point(-0.4, -0.1, 0) & point(-0.2, -0.1, 0); 
+  const L4_4dof = point(-0.3, -0.2, 0.1) & point(-0.3, 0.2, 0.1); 
 
   // 2. 3 DOF (Wrist Singularity): Concurrent lines (intersecting at the center)
-  const L1_3dof = point(2, 0, -1) & point(4, 0, 1);
-  const L2_3dof = point(2, 0, 1) & point(4, 0, -1);
-  const L3_3dof = point(3, -1, 0) & point(3, 1, 0);
-  const L4_3dof = point(3, 0, -1.5) & point(3, 0, 1.5); 
+  const L1_3dof = point(0.2, 0, -0.1) & point(0.4, 0, 0.1);
+  const L2_3dof = point(0.2, 0, 0.1) & point(0.4, 0, -0.1);
+  const L3_3dof = point(0.3, -0.1, 0) & point(0.3, 0.1, 0);
+  const L4_3dof = point(0.3, 0, -0.15) & point(0.3, 0, 0.15); 
 
   // --- CALCULATIONS ---
   const g6_4dof = wedgeNormG6(L1_4dof, L2_4dof, L3_4dof, L4_4dof);
